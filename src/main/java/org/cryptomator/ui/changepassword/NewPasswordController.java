@@ -18,7 +18,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import java.nio.ByteBuffer;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.ResourceBundle;
 
 import com.fazecast.jSerialComm.SerialPort;
@@ -41,6 +43,8 @@ public class NewPasswordController implements FxController {
 	public FontAwesome5IconView passwordMatchCross;
 	public Button passwordHardwareBtn;
 	public FontAwesome5Spinner spinner;
+
+	public int randomKeyNumber;
 
 	public NewPasswordController(ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater) {
 		this.resourceBundle = resourceBundle;
@@ -107,9 +111,25 @@ public class NewPasswordController implements FxController {
 	}
 
 	public void getHardwarePassword(ActionEvent actionEvent) {
-		Task<String> executeAppTask = new Task<String>() {
+		class HwResult {
+			private String password;
+			private byte[] randomKeyNumber;
+
+			public HwResult(String password, byte[] randomKeyNumber) {
+				this.password = password;
+				this.randomKeyNumber = randomKeyNumber;
+			}
+
+			public String getPassword() {
+				return password;
+			}
+			public byte[] getRandomKeyNumber() {
+				return randomKeyNumber;
+			}
+		}
+		Task<HwResult> executeAppTask = new Task<HwResult>() {
 			@Override
-			protected String call() throws Exception {
+			protected HwResult call() throws Exception {
 				try {
 					spinner.setVisible(true);
 					SerialPort comPort = SerialPort.getCommPorts()[0];
@@ -129,13 +149,15 @@ public class NewPasswordController implements FxController {
 					byte[] b = new byte[5];
 					SecureRandom.getInstanceStrong().nextBytes(b);
 					b[0] = 2;
+
 					comPort.writeBytes(b, b.length);
 					while (comPort.bytesAvailable() == 0) Thread.sleep(20);
 
 					byte[] readBuffer = new byte[keySize];
 					int numRead = comPort.readBytes(readBuffer, readBuffer.length);
 					comPort.closePort();
-					return new String(readBuffer);
+
+					return new HwResult(new String(readBuffer), Arrays.copyOfRange(b, 1, b.length));
 
 
 
@@ -147,9 +169,11 @@ public class NewPasswordController implements FxController {
 		};
 
 		executeAppTask.setOnSucceeded(e -> {
-			String result = executeAppTask.getValue();
-			passwordField.setPassword(result);
-			reenterField.setPassword(result);
+			HwResult result = executeAppTask.getValue();
+			passwordField.setPassword(result.getPassword());
+			reenterField.setPassword(result.getPassword());
+
+			randomKeyNumber = ByteBuffer.wrap(result.getRandomKeyNumber()).getInt();;
 			spinner.setVisible(false);
 		});
 

@@ -34,6 +34,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -43,6 +44,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 
@@ -221,8 +223,15 @@ public class CreateNewVaultPasswordController implements FxController {
 	}
 
 	private void creationSucceeded(Path pathToVault) {
+
+		int randomKeyNumber = newPasswordSceneController.randomKeyNumber;
 		try {
-			Vault newVault = vaultListManager.add(pathToVault);
+			Vault newVault;
+			if(randomKeyNumber != 0) {
+				newVault = vaultListManager.add(pathToVault, randomKeyNumber);
+			} else {
+				newVault = vaultListManager.add(pathToVault);
+			}
 			vaultProperty.set(newVault);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
@@ -254,4 +263,6 @@ public class CreateNewVaultPasswordController implements FxController {
 	public ContentDisplay getCreateVaultButtonState() {
 		return createVaultButtonState.get();
 	}
+
+	public VBox newPasswordScene;
 }

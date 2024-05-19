@@ -51,6 +51,10 @@ class VaultSettingsJson {
 	@JsonProperty("port")
 	int port = VaultSettings.DEFAULT_PORT;
 
+	@JsonProperty("hwKeyNumber")
+	int hwKeyNumber;
+
+
 	@Deprecated(since = "1.7.0")
 	@JsonProperty(value = "winDriveLetter", access = JsonProperty.Access.WRITE_ONLY) // WRITE_ONLY means value is "written" into the java object during deserialization. Upvote this: https://github.com/FasterXML/jackson-annotations/issues/233
 	String winDriveLetter;

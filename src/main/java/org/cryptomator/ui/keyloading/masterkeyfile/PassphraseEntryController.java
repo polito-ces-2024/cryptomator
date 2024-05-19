@@ -24,11 +24,14 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
@@ -52,7 +55,7 @@ public class PassphraseEntryController implements FxController {
 	private final BooleanProperty unlockInProgress = new SimpleBooleanProperty();
 	private final ObjectBinding<ContentDisplay> unlockButtonContentDisplay = Bindings.when(unlockInProgress).then(ContentDisplay.LEFT).otherwise(ContentDisplay.TEXT_ONLY);
 	private final BooleanProperty unlockButtonDisabled = new SimpleBooleanProperty();
-
+	private  IntegerProperty randomKeyNumber;
 	/* FXML */
 	public NiceSecurePasswordField passwordField;
 	public CheckBox savePasswordCheckbox;
@@ -62,11 +65,13 @@ public class PassphraseEntryController implements FxController {
 	public ImageView legs;
 	public ImageView body;
 	public Animation unlockAnimation;
+	public Label hwLabelTest;
 
 	@Inject
 	public PassphraseEntryController(@KeyLoading Stage window, @KeyLoading Vault vault, CompletableFuture<PassphraseEntryResult> result, @Nullable @Named("savedPassword") Passphrase savedPassword, ForgetPasswordComponent.Builder forgetPassword, KeychainManager keychain) {
 		this.window = window;
 		this.vault = vault;
+		this.randomKeyNumber = this.vault.getVaultSettings().hwKeyNumber;
 		this.result = result;
 		this.savedPassword = savedPassword;
 		this.forgetPassword = forgetPassword;
@@ -78,6 +83,10 @@ public class PassphraseEntryController implements FxController {
 
 	@FXML
 	public void initialize() {
+
+		hwLabelTest.setVisible(randomKeyNumber.get() > 0);
+		System.out.println("Random number: " +  randomKeyNumber.get());
+
 		if (savedPassword != null) {
 			savePasswordCheckbox.setSelected(true);
 			passwordField.setPassword(savedPassword);

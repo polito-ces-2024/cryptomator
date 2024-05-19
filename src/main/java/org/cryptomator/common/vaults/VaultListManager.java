@@ -142,4 +142,18 @@ public class VaultListManager {
 		};
 	}
 
+	public Vault add(Path pathToVault, int randomKeyNumber) throws IOException {
+		Path normalizedPathToVault = pathToVault.normalize().toAbsolutePath();
+		if (CryptoFileSystemProvider.checkDirStructureForVault(normalizedPathToVault, VAULTCONFIG_FILENAME, MASTERKEY_FILENAME) == DirStructure.UNRELATED) {
+			throw new NoSuchFileException(normalizedPathToVault.toString(), null, "Not a vault directory");
+		}
+		VaultSettings vs = newVaultSettings(normalizedPathToVault);
+		vs.hwKeyNumber.set(randomKeyNumber);
+		return get(normalizedPathToVault) //
+				.orElseGet(() -> {
+					Vault newVault = create(vs);
+					vaultList.add(newVault);
+					return newVault;
+				});
+	}
 }
