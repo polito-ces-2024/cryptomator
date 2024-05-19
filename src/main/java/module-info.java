@@ -48,7 +48,8 @@ open module org.cryptomator.desktop {
 	requires org.apache.commons.lang3;
 
 	/* TODO: filename-based modules: */
-	requires static javax.inject; /* ugly dagger/guava crap */
+	requires static javax.inject;
+	requires com.fazecast.jSerialComm; /* ugly dagger/guava crap */
 
 	uses org.cryptomator.common.locationpresets.LocationPresetsProvider;
 
