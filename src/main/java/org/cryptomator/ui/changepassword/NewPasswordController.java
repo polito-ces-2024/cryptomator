@@ -18,6 +18,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import java.security.SecureRandom;
 import java.util.ResourceBundle;
 
 import com.fazecast.jSerialComm.SerialPort;
@@ -124,10 +125,11 @@ public class NewPasswordController implements FxController {
 					comPort.setNumStopBits(1);
 					comPort.setParity(SerialPort.NO_PARITY);
 
-
-					byte b[] = new byte[]{2, 0, 0, 0, 0}; //Get Key 0
-					comPort.writeBytes(b, 1);
-
+					/*Generate random 2^32 key number*/
+					byte[] b = new byte[5];
+					SecureRandom.getInstanceStrong().nextBytes(b);
+					b[0] = 2;
+					comPort.writeBytes(b, b.length);
 					while (comPort.bytesAvailable() == 0) Thread.sleep(20);
 
 					byte[] readBuffer = new byte[keySize];
