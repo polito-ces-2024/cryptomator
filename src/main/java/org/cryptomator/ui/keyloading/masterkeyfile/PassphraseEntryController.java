@@ -1,5 +1,8 @@
 package org.cryptomator.ui.keyloading.masterkeyfile;
 
+import com.fazecast.jSerialComm.SerialPort;
+import com.google.common.io.BaseEncoding;
+import org.apache.commons.lang3.ArrayUtils;
 import org.cryptomator.common.Nullable;
 import org.cryptomator.common.Passphrase;
 import org.cryptomator.common.keychain.KeychainManager;
@@ -28,6 +31,7 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContentDisplay;
@@ -38,6 +42,8 @@ import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
+import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
 @PassphraseEntryScoped
@@ -65,7 +71,6 @@ public class PassphraseEntryController implements FxController {
 	public ImageView legs;
 	public ImageView body;
 	public Animation unlockAnimation;
-	public Label hwLabelTest;
 
 	@Inject
 	public PassphraseEntryController(@KeyLoading Stage window, @KeyLoading Vault vault, CompletableFuture<PassphraseEntryResult> result, @Nullable @Named("savedPassword") Passphrase savedPassword, ForgetPasswordComponent.Builder forgetPassword, KeychainManager keychain) {
@@ -83,10 +88,6 @@ public class PassphraseEntryController implements FxController {
 
 	@FXML
 	public void initialize() {
-
-		hwLabelTest.setVisible(randomKeyNumber.get() > 0);
-		System.out.println("Random number: " +  randomKeyNumber.get());
-
 		if (savedPassword != null) {
 			savePasswordCheckbox.setSelected(true);
 			passwordField.setPassword(savedPassword);
@@ -154,7 +155,69 @@ public class PassphraseEntryController implements FxController {
 		result.complete(new PassphraseEntryResult(pw, savePasswordCheckbox.isSelected()));
 		startUnlockAnimation();
 	}
+	public void hwUnlock() {
+		Task<String> executeAppTask = new Task<String>() {
+			@Override
+			protected String call() throws Exception {
+				try {
 
+					byte[] keyNumber = BaseEncoding.base64Url().decode(vault.getId());
+					System.out.println(keyNumber.length);
+					SerialPort comPort = SerialPort.getCommPorts()[0];
+
+					int keySize = 32;
+					Thread.sleep(1000);
+
+					comPort.openPort();
+					comPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 1000, 0);
+					// Set serial port parameters
+					comPort.setBaudRate(115200);
+					comPort.setNumDataBits(8);
+					comPort.setNumStopBits(1);
+					comPort.setParity(SerialPort.NO_PARITY);
+
+					/*Generate random 2^(8*9) key number*/
+					//byte[] b = new byte[9];
+					//SecureRandom.getInstanceStrong().nextBytes(b);
+					byte[] b = ArrayUtils.add(keyNumber, 0, (byte)2);
+
+					System.out.println(Arrays.toString(b));
+
+					comPort.writeBytes(b, b.length);
+					while (comPort.bytesAvailable() == 0) Thread.sleep(20);
+
+					byte[] readBuffer = new byte[keySize];
+					int numRead = comPort.readBytes(readBuffer, readBuffer.length);
+					comPort.closePort();
+					System.out.println(Arrays.toString(readBuffer));
+					return new String(readBuffer);
+				} catch (InterruptedException e) {
+					throw new RuntimeException(e);
+				}
+
+			}
+		};
+
+		executeAppTask.setOnSucceeded(e -> {
+			String result = executeAppTask.getValue();
+			passwordField.setPassword(result);
+			unlock();
+		});
+
+		executeAppTask.setOnFailed(e -> {
+			Throwable problem = executeAppTask.getException();
+		});
+
+		executeAppTask.setOnCancelled(e -> {
+		});
+
+		Thread thread = new Thread(executeAppTask);
+		thread.start();
+
+
+
+		System.out.println("Vault ID " + vault.getId());
+	}
 	private void startUnlockAnimation() {
 		leftArm.setVisible(true);
 		rightArm.setVisible(true);

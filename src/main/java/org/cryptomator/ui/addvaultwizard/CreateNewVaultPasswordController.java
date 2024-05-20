@@ -224,10 +224,10 @@ public class CreateNewVaultPasswordController implements FxController {
 
 	private void creationSucceeded(Path pathToVault) {
 
-		int randomKeyNumber = newPasswordSceneController.randomKeyNumber;
+		byte[] randomKeyNumber = newPasswordSceneController.randomKeyNumber;
 		try {
 			Vault newVault;
-			if(randomKeyNumber != 0) {
+			if(newPasswordSceneController.isHardware()) {
 				newVault = vaultListManager.add(pathToVault, randomKeyNumber);
 			} else {
 				newVault = vaultListManager.add(pathToVault);
@@ -264,5 +264,4 @@ public class CreateNewVaultPasswordController implements FxController {
 		return createVaultButtonState.get();
 	}
 
-	public VBox newPasswordScene;
 }

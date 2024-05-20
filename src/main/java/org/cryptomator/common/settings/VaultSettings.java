@@ -108,8 +108,17 @@ public class VaultSettings {
 	public static VaultSettings withRandomId() {
 		var defaults = new VaultSettingsJson();
 		defaults.id = generateId();
+		System.out.println("Created vault with ID " + defaults.id);
 		return new VaultSettings(defaults);
 	}
+	public static VaultSettings withHardwareId(byte[] keyNumber) {
+		var defaults = new VaultSettingsJson();
+		defaults.id = BaseEncoding.base64Url().encode(keyNumber);
+		System.out.println("Created vault with HW ID" + defaults.id);
+		return new VaultSettings(defaults);
+	}
+
+
 
 	private static String generateId() {
 		byte[] randomBytes = new byte[9];

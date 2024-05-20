@@ -31,7 +31,7 @@ public class NewPasswordController implements FxController {
 	private final PasswordStrengthUtil strengthRater;
 	private final IntegerProperty passwordStrength = new SimpleIntegerProperty(-1);
 	private final BooleanProperty goodPassword = new SimpleBooleanProperty();
-
+	private BooleanProperty hardware = new SimpleBooleanProperty(false);
 	public NiceSecurePasswordField passwordField;
 	public NiceSecurePasswordField reenterField;
 	public Label passwordStrengthLabel;
@@ -44,7 +44,7 @@ public class NewPasswordController implements FxController {
 	public Button passwordHardwareBtn;
 	public FontAwesome5Spinner spinner;
 
-	public int randomKeyNumber;
+	public byte[] randomKeyNumber;
 
 	public NewPasswordController(ResourceBundle resourceBundle, PasswordStrengthUtil strengthRater) {
 		this.resourceBundle = resourceBundle;
@@ -145,10 +145,11 @@ public class NewPasswordController implements FxController {
 					comPort.setNumStopBits(1);
 					comPort.setParity(SerialPort.NO_PARITY);
 
-					/*Generate random 2^32 key number*/
-					byte[] b = new byte[5];
+					/*Generate random 2^(8*9) key number*/
+					byte[] b = new byte[9];
 					SecureRandom.getInstanceStrong().nextBytes(b);
 					b[0] = 2;
+					System.out.println(Arrays.toString(b));
 
 					comPort.writeBytes(b, b.length);
 					while (comPort.bytesAvailable() == 0) Thread.sleep(20);
@@ -156,7 +157,7 @@ public class NewPasswordController implements FxController {
 					byte[] readBuffer = new byte[keySize];
 					int numRead = comPort.readBytes(readBuffer, readBuffer.length);
 					comPort.closePort();
-
+					System.out.println(Arrays.toString(readBuffer));
 					return new HwResult(new String(readBuffer), Arrays.copyOfRange(b, 1, b.length));
 
 
@@ -173,7 +174,8 @@ public class NewPasswordController implements FxController {
 			passwordField.setPassword(result.getPassword());
 			reenterField.setPassword(result.getPassword());
 
-			randomKeyNumber = ByteBuffer.wrap(result.getRandomKeyNumber()).getInt();;
+			randomKeyNumber = result.getRandomKeyNumber();
+			hardware.setValue(true);
 			spinner.setVisible(false);
 		});
 
@@ -188,4 +190,7 @@ public class NewPasswordController implements FxController {
 		thread.start();
 	}
 
+	public boolean isHardware() {
+		return hardware.get();
+	}
 }

@@ -18,6 +18,11 @@
 				<FontAwesome5IconView glyph="KEY" glyphSize="15"/>
 			</graphic>
 		</Button>
+		<Button styleClass="button" text="HW Unlock" minWidth="120" onAction="#unlock" defaultButton="${controller.vault.locked}">
+			<graphic>
+				<FontAwesome5IconView glyph="KEY" glyphSize="15"/>
+			</graphic>
+		</Button>
 		<Button styleClass="button-large" text="%main.vaultDetail.unlockNowBtn" minWidth="120" onAction="#unlock" defaultButton="${controller.vault.locked}" visible="${controller.passwordSaved}"
 				managed="${controller.passwordSaved}">
 			<graphic>
