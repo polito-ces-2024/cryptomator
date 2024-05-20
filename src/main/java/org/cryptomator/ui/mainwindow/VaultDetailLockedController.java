@@ -38,7 +38,8 @@ public class VaultDetailLockedController implements FxController {
 			this.passwordSaved = new SimpleBooleanProperty(false);
 		}
 	}
-
+	//TODO: Separate hardware unlock procedure
+	public void hwUnlock() {appWindows.startUnlockWorkflow(vault.get(), mainWindow);}
 	@FXML
 	public void unlock() {
 		appWindows.startUnlockWorkflow(vault.get(), mainWindow);

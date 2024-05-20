@@ -18,7 +18,7 @@
 				<FontAwesome5IconView glyph="KEY" glyphSize="15"/>
 			</graphic>
 		</Button>
-		<Button styleClass="button" text="HW Unlock" minWidth="120" onAction="#unlock" defaultButton="${controller.vault.locked}">
+		<Button styleClass="button" text="HW Unlock" minWidth="120" onAction="#hwUnlock" defaultButton="${controller.vault.locked}">
 			<graphic>
 				<FontAwesome5IconView glyph="KEY" glyphSize="15"/>
 			</graphic>

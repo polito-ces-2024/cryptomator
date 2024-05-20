@@ -110,6 +110,37 @@ public class NewPasswordController implements FxController {
 		return passwordField.getCharacters();
 	}
 
+	public static SerialPort detectHardwarePort() throws InterruptedException {
+		SerialPort ports[] = SerialPort.getCommPorts();
+		SerialPort comPort = null;
+		for (SerialPort p : ports) {
+			p.openPort();
+			p.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 1000, 0);
+			// Set serial port parameters
+			p.setBaudRate(115200);
+			p.setNumDataBits(8);
+			p.setNumStopBits(1);
+			p.setParity(SerialPort.NO_PARITY);
+
+
+			byte b[] = new byte[]{0};
+			p.writeBytes(b, b.length);
+
+
+			while (p.bytesAvailable() == 0)
+				Thread.sleep(20);
+
+			byte[] readBuffer = new byte[33];
+			int numRead = p.readBytes(readBuffer, readBuffer.length);
+
+			p.closePort();
+
+			if (readBuffer[1] == 2 && readBuffer[32] == 1) {
+				return p;
+			}
+		}
+		return null;
+	}
 	public void getHardwarePassword(ActionEvent actionEvent) {
 		class HwResult {
 			private String password;
@@ -132,7 +163,7 @@ public class NewPasswordController implements FxController {
 			protected HwResult call() throws Exception {
 				try {
 					spinner.setVisible(true);
-					SerialPort comPort = SerialPort.getCommPorts()[0];
+					SerialPort comPort = detectHardwarePort();
 
 					int keySize = 32;
 					Thread.sleep(1000);
