@@ -8,6 +8,7 @@ import org.cryptomator.ui.fxapp.FxApplicationWindows;
 import org.cryptomator.ui.fxapp.UpdateChecker;
 import org.cryptomator.ui.preferences.SelectedPreferencesTab;
 import org.cryptomator.ui.traymenu.TrayMenuComponent;
+import org.polito.hsm.HardwareDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +16,7 @@ import javax.inject.Inject;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
@@ -153,5 +155,13 @@ public class MainWindowTitleController implements FxController {
 	public boolean isShowMinimizeButton() {
 		// always show the minimize button if no tray icon is present OR it is explicitly enabled
 		return !trayMenuInitialized || settings.showMinimizeButton.get();
+	}
+
+	public void lockHardware(ActionEvent actionEvent) {
+		try {
+			HardwareDetector.sendCommand(HardwareDetector.detectHardware(), (byte) 1, null);
+		}catch (Exception e) {
+			System.out.println(e);
+		}
 	}
 }

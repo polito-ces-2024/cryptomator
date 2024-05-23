@@ -35,7 +35,14 @@
 		</Hyperlink>
 
 		<Region HBox.hgrow="ALWAYS"/>
-
+		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#lockHardware" focusTraversable="false">
+			<graphic>
+				<FontAwesome5IconView glyph="LOCK" glyphSize="16"/>
+			</graphic>
+			<tooltip>
+				<Tooltip text="%main.closeBtn.tooltip"/>
+			</tooltip>
+		</Button>
 		<Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#showContributePreferences" focusTraversable="false" visible="${!controller.licenseHolder.validLicense}">
 			<graphic>
 				<StackPane>
