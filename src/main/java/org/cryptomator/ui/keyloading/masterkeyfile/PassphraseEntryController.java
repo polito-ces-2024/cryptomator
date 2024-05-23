@@ -166,32 +166,7 @@ public class PassphraseEntryController implements FxController {
 					System.out.println(keyNumber.length);
 					SerialPort comPort = HardwareDetector.detectHardware();
 
-					int keySize = 32;
-					Thread.sleep(1000);
-
-					comPort.openPort();
-					comPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 1000, 0);
-					// Set serial port parameters
-					comPort.setBaudRate(115200);
-					comPort.setNumDataBits(8);
-					comPort.setNumStopBits(1);
-					comPort.setParity(SerialPort.NO_PARITY);
-
-					/*Generate random 2^(8*9) key number*/
-					//byte[] b = new byte[9];
-					//SecureRandom.getInstanceStrong().nextBytes(b);
-					byte[] b = ArrayUtils.add(keyNumber, 0, (byte)2);
-
-					System.out.println(Arrays.toString(b));
-
-					comPort.writeBytes(b, b.length);
-					while (comPort.bytesAvailable() == 0) Thread.sleep(20);
-
-					byte[] readBuffer = new byte[keySize];
-					int numRead = comPort.readBytes(readBuffer, readBuffer.length);
-					comPort.closePort();
-					System.out.println(Arrays.toString(readBuffer));
-					return new String(readBuffer);
+					return new String(HardwareDetector.sendCommand(comPort, (byte)2, keyNumber));
 				} catch (InterruptedException e) {
 					throw new RuntimeException(e);
 				}
