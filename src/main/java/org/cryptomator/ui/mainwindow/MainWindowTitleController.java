@@ -1,5 +1,6 @@
 package org.cryptomator.ui.mainwindow;
 
+import com.fazecast.jSerialComm.SerialPort;
 import org.cryptomator.common.LicenseHolder;
 import org.cryptomator.common.settings.Settings;
 import org.cryptomator.ui.common.FxController;
@@ -16,11 +17,13 @@ import javax.inject.Inject;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
+import java.security.SecureRandom;
 
 @MainWindowScoped
 public class MainWindowTitleController implements FxController {
@@ -158,10 +161,35 @@ public class MainWindowTitleController implements FxController {
 	}
 
 	public void lockHardware(ActionEvent actionEvent) {
-		try {
-			HardwareDetector.sendCommand(HardwareDetector.detectHardware(), (byte) 1, null);
-		}catch (Exception e) {
-			System.out.println(e);
-		}
+		Task<byte[]> executeAppTask = new Task<byte[]>() {
+			@Override
+			protected byte[] call() throws Exception {
+				try {
+
+					return HardwareDetector.sendCommand(HardwareDetector.detectHardware(), (byte) 1, null);
+
+				} catch (InterruptedException e) {
+					throw new RuntimeException(e);
+				}
+			}
+		};
+
+		executeAppTask.setOnSucceeded(e -> {
+			byte ans[] = executeAppTask.getValue();
+			if(ans.length > 0 && ans[0] == 1)
+				System.out.println("Device Locked Successfully");
+			else
+				System.out.println("Error during lock");
+		});
+
+		executeAppTask.setOnFailed(e -> {
+			Throwable problem = executeAppTask.getException();
+		});
+
+		executeAppTask.setOnCancelled(e -> {
+		});
+
+		Thread thread = new Thread(executeAppTask);
+		thread.start();
 	}
 }
