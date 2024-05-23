@@ -12,6 +12,7 @@ import org.cryptomator.ui.common.WeakBindings;
 import org.cryptomator.ui.controls.NiceSecurePasswordField;
 import org.cryptomator.ui.forgetpassword.ForgetPasswordComponent;
 import org.cryptomator.ui.keyloading.KeyLoading;
+import org.polito.hsm.HardwareDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -155,37 +156,6 @@ public class PassphraseEntryController implements FxController {
 		result.complete(new PassphraseEntryResult(pw, savePasswordCheckbox.isSelected()));
 		startUnlockAnimation();
 	}
-	public static SerialPort detectHardwarePort() throws InterruptedException {
-		SerialPort ports[] = SerialPort.getCommPorts();
-		SerialPort comPort = null;
-		for (SerialPort p : ports) {
-			p.openPort();
-			p.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 1000, 0);
-			// Set serial port parameters
-			p.setBaudRate(115200);
-			p.setNumDataBits(8);
-			p.setNumStopBits(1);
-			p.setParity(SerialPort.NO_PARITY);
-
-
-			byte b[] = new byte[]{0};
-			p.writeBytes(b, b.length);
-
-
-			while (p.bytesAvailable() == 0)
-				Thread.sleep(20);
-
-			byte[] readBuffer = new byte[33];
-			int numRead = p.readBytes(readBuffer, readBuffer.length);
-
-			p.closePort();
-
-			if (readBuffer[1] == 2 && readBuffer[32] == 1) {
-				return p;
-			}
-		}
-		return null;
-	}
 	public void hwUnlock() {
 		Task<String> executeAppTask = new Task<String>() {
 			@Override
@@ -194,7 +164,7 @@ public class PassphraseEntryController implements FxController {
 
 					byte[] keyNumber = BaseEncoding.base64Url().decode(vault.getId());
 					System.out.println(keyNumber.length);
-					SerialPort comPort = detectHardwarePort();
+					SerialPort comPort = HardwareDetector.detectHardware();
 
 					int keySize = 32;
 					Thread.sleep(1000);
