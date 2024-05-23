@@ -176,7 +176,7 @@ public class MainWindowTitleController implements FxController {
 
 		executeAppTask.setOnSucceeded(e -> {
 			byte ans[] = executeAppTask.getValue();
-			if(ans.length > 0 && ans[0] == 1)
+			if(ans.length > 0 && ans[0] == 0)
 				System.out.println("Device Locked Successfully");
 			else
 				System.out.println("Error during lock");
