@@ -57,6 +57,8 @@ public enum FontAwesome5Icon {
 	USER_COG("\uf4fe"), //
 	WRENCH("\uF0AD"), //
 	WINDOW_MINIMIZE("\uF2D1"), //
+
+	SHIELD("\uF3ED"), //
 	;
 
 	private final String unicode;
