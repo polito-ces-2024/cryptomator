@@ -59,7 +59,6 @@ public class VaultSettings {
 	public final StringProperty mountService;
 	public final IntegerProperty port;
 
-	public final IntegerProperty hwKeyNumber;
 
 	VaultSettings(VaultSettingsJson json) {
 		this.id = json.id;
@@ -76,7 +75,6 @@ public class VaultSettings {
 		this.mountPoint = new SimpleObjectProperty<>(this, "mountPoint", json.mountPoint == null ? null : Path.of(json.mountPoint));
 		this.mountService = new SimpleStringProperty(this, "mountService", json.mountService);
 		this.port = new SimpleIntegerProperty(this, "port", json.port);
-		this.hwKeyNumber = new SimpleIntegerProperty(this, "hwKeyNumber", json.hwKeyNumber);
 		// mount name is no longer an explicit setting, see https://github.com/cryptomator/cryptomator/pull/1318
 		this.mountName = StringExpression.stringExpression(Bindings.createStringBinding(() -> {
 			final String name;
