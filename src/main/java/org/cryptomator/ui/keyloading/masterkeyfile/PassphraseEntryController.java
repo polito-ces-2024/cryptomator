@@ -62,7 +62,6 @@ public class PassphraseEntryController implements FxController {
 	private final BooleanProperty unlockInProgress = new SimpleBooleanProperty();
 	private final ObjectBinding<ContentDisplay> unlockButtonContentDisplay = Bindings.when(unlockInProgress).then(ContentDisplay.LEFT).otherwise(ContentDisplay.TEXT_ONLY);
 	private final BooleanProperty unlockButtonDisabled = new SimpleBooleanProperty();
-	private  IntegerProperty randomKeyNumber;
 	/* FXML */
 	public NiceSecurePasswordField passwordField;
 	public CheckBox savePasswordCheckbox;
@@ -77,7 +76,6 @@ public class PassphraseEntryController implements FxController {
 	public PassphraseEntryController(@KeyLoading Stage window, @KeyLoading Vault vault, CompletableFuture<PassphraseEntryResult> result, @Nullable @Named("savedPassword") Passphrase savedPassword, ForgetPasswordComponent.Builder forgetPassword, KeychainManager keychain) {
 		this.window = window;
 		this.vault = vault;
-		this.randomKeyNumber = this.vault.getVaultSettings().hwKeyNumber;
 		this.result = result;
 		this.savedPassword = savedPassword;
 		this.forgetPassword = forgetPassword;
